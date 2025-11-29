@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import DarkVeil from "../components/DarkVeil";
 import FallingFeather from "../components/FallingFeather";
+import PetalEffect from "../components/PetalEffect";
+import { generateReasons } from "../utils/reasons";
 
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -16,10 +18,12 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showFeather, setShowFeather] = useState(true);
   const [showStory, setShowStory] = useState(true);
+  const [visibleReasons, setVisibleReasons] = useState(50);
   const audioRef = useRef<HTMLAudioElement>(null);
   const slideshowRef = useRef<HTMLDivElement>(null);
   const storyRef = useRef<HTMLDivElement>(null);
   const photos = [1, 2, 3, 4, 5];
+  const reasons = generateReasons();
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -430,7 +434,62 @@ export default function Home() {
               </div>
             </div>
           </div>
+
+        {/* Razões de te amar */}
+        <div className="mt-8 w-full max-w-2xl px-4">
+          <div className="bg-black/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/10 text-white">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">Razões de te amar</h2>
+              <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent mx-auto"></div>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4 max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-red-400/50 scrollbar-track-transparent">
+              {reasons.slice(0, visibleReasons).map((razao, index) => (
+                <div 
+                  key={index} 
+                  className="bg-white/5 rounded-2xl p-4 hover:bg-white/10 transition-all duration-300 group cursor-pointer flex-shrink-0"
+                  style={{ animationDelay: `${index * 0.02}s` }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <span className="text-red-400 text-xl group-hover:scale-125 transition-transform duration-300">❤️</span>
+                    <p className="text-white/90 group-hover:text-white transition-colors duration-300 text-sm">{razao}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-6 text-center space-y-4">
+              <div className="text-red-200">
+                <p className="font-bold text-lg">{visibleReasons.toLocaleString()} de {reasons.length.toLocaleString()} razões mostradas</p>
+                <p className="text-sm opacity-75">Cada uma única e verdadeira 💕</p>
+              </div>
+              
+              {visibleReasons < reasons.length && (
+                <button
+                  onClick={() => setVisibleReasons(prev => Math.min(prev + 100, reasons.length))}
+                  className="bg-red-500/20 hover:bg-red-500/30 text-white px-6 py-3 rounded-2xl transition-all duration-300 border border-red-400/20 hover:border-red-400/40"
+                >
+                  Ver mais razões ❤️ (+100)
+                </button>
+              )}
+              
+              {visibleReasons >= reasons.length && (
+                <div className="text-center">
+                  <p className="text-red-200 font-medium text-lg">
+                    ✨ Todas as 5.000 razões reveladas! ✨
+                  </p>
+                  <p className="text-white/70 text-sm mt-2">
+                    E ainda assim, não são suficientes para expressar todo meu amor...
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Efeitos visuais */}
+      <PetalEffect />
 
       {/* Pena caindo no carregamento */}
       {showFeather && (
