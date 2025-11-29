@@ -424,7 +424,7 @@ export default function Home() {
               <div className="mt-8 text-center">
                 <div className="inline-flex items-center space-x-2 text-red-300">
                   <span className="text-2xl">💕</span>
-                  <span className="text-sm font-medium">Com amor</span>
+                  <span className="text-sm font-medium">Com amor seu futuro marido❤️</span>
                   <span className="text-2xl">💕</span>
                 </div>
               </div>
