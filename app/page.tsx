@@ -1,8 +1,7 @@
 'use client';
 
-import Image from "next/image";
 import { useState, useRef, useMemo, useEffect } from "react";
-import { Heart, Sparkles } from "lucide-react";
+import { Heart, Sparkles, Music, Volume2 } from "lucide-react";
 import DarkVeil from "../components/DarkVeil";
 import FallingFeather from "../components/FallingFeather";
 import PetalEffect from "../components/PetalEffect";
@@ -17,14 +16,10 @@ import WordGame from "../components/WordGame";
 import { generateReasons } from "../utils/reasons";
 
 export default function Home() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isLiked, setIsLiked] = useState(false);
   const [showFeather, setShowFeather] = useState(true);
   const [visibleReasons, setVisibleReasons] = useState(50);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [storyIndex, setStoryIndex] = useState(0);
+  const [audioOn, setAudioOn] = useState(false);
   const photos = useMemo(() => Array.from({ length: 17 }, (_, i) => i + 1), []);
   // Memoizado: o contador re-renderiza a cada 1s; sem isso o Stack reiniciaria sempre
   const stackCards = useMemo(
@@ -41,97 +36,91 @@ export default function Home() {
   );
   const reasons = useMemo(() => generateReasons(), []);
 
-  const seekedRef = useRef(false);
+  // ---- Música por story, com crossfade ----
+  const VOL = 0.85;
+  const FADE_MS = 900;
+  // Offset de início (em segundos) por número da faixa
+  const START_OFFSETS: Record<number, number> = { 1: 15, 2: 13, 4: 42, 5: 40, 7: 50 };
+  const trackFor = (i: number) => `/sound/${i + 1}.mp3`;
+  const offsetFor = (i: number) => START_OFFSETS[i + 1] ?? 0;
 
-  // Toca e, assim que o playback começa de fato, posiciona em 0:15 (1ª vez)
-  const startMusic = () => {
-    const a = audioRef.current;
-    if (!a) return;
-    a.play()
-      .then(() => {
-        if (!seekedRef.current) {
-          a.currentTime = START_AT;
-          seekedRef.current = true;
-        }
-        setIsPlaying(true);
-      })
-      .catch(() => {});
-  };
+  const channelsRef = useRef<{ a: HTMLAudioElement; b: HTMLAudioElement; active: 0 | 1 } | null>(null);
+  const fadeRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const togglePlay = () => {
-    const a = audioRef.current;
-    if (!a) return;
-    if (isPlaying) {
-      a.pause();
-      setIsPlaying(false);
-    } else {
-      startMusic();
+  const ensureChannels = () => {
+    if (!channelsRef.current && typeof Audio !== 'undefined') {
+      const a = new Audio();
+      const b = new Audio();
+      a.loop = true;
+      b.loop = true;
+      a.preload = 'auto';
+      b.preload = 'auto';
+      channelsRef.current = { a, b, active: 0 };
     }
+    return channelsRef.current;
   };
 
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  const START_AT = 15; // música começa em 0:15
-
-  const handleLoadedMetadata = () => {
-    const a = audioRef.current;
-    if (!a) return;
-    setDuration(a.duration);
-    if (!seekedRef.current) {
-      a.currentTime = START_AT;
-      setCurrentTime(START_AT);
-      seekedRef.current = true;
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = parseFloat(e.target.value);
-    setCurrentTime(newTime);
-    seekedRef.current = true; // respeita ajuste manual
-    if (audioRef.current) {
-      audioRef.current.currentTime = newTime;
-    }
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
-    }
-  };
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  // Autoplay no primeiro gesto do usuário (navegadores bloqueiam som sem interação)
-  useEffect(() => {
-    const startOnGesture = () => {
-      const a = audioRef.current;
-      if (a && a.paused) {
-        startMusic();
+  const loadTrack = (audio: HTMLAudioElement, i: number) => {
+    audio.src = trackFor(i);
+    const seek = () => {
+      try {
+        audio.currentTime = offsetFor(i);
+      } catch {
+        /* noop */
       }
-      window.removeEventListener('pointerdown', startOnGesture);
-      window.removeEventListener('keydown', startOnGesture);
-      window.removeEventListener('touchstart', startOnGesture);
     };
-    window.addEventListener('pointerdown', startOnGesture);
-    window.addEventListener('keydown', startOnGesture);
-    window.addEventListener('touchstart', startOnGesture);
-    return () => {
-      window.removeEventListener('pointerdown', startOnGesture);
-      window.removeEventListener('keydown', startOnGesture);
-      window.removeEventListener('touchstart', startOnGesture);
-    };
+    if (audio.readyState >= 1) seek();
+    else audio.addEventListener('loadedmetadata', seek, { once: true });
+  };
+
+  const crossfadeTo = (i: number, immediate = false) => {
+    const ch = ensureChannels();
+    if (!ch) return;
+    const cur = ch.active === 0 ? ch.a : ch.b;
+    const nxt = ch.active === 0 ? ch.b : ch.a;
+
+    loadTrack(nxt, i);
+    nxt.volume = immediate ? VOL : 0;
+    nxt.play().catch(() => {});
+
+    if (fadeRef.current) clearInterval(fadeRef.current);
+    if (!immediate) {
+      const steps = 30;
+      let s = 0;
+      fadeRef.current = setInterval(() => {
+        s++;
+        const p = s / steps;
+        nxt.volume = Math.min(VOL, VOL * p);
+        cur.volume = Math.max(0, VOL * (1 - p));
+        if (s >= steps) {
+          if (fadeRef.current) clearInterval(fadeRef.current);
+          cur.pause();
+        }
+      }, FADE_MS / steps);
+    } else {
+      cur.pause();
+    }
+    ch.active = ch.active === 0 ? 1 : 0;
+  };
+
+  // Ativa o áudio no gesto do usuário (botão), tocando a faixa do story atual
+  const enableAudio = () => {
+    if (audioOn) return;
+    const ch = ensureChannels();
+    if (!ch) return;
+    const first = ch.active === 0 ? ch.a : ch.b;
+    loadTrack(first, storyIndex);
+    first.volume = VOL;
+    first.play().catch(() => {});
+    setAudioOn(true);
+  };
+
+  // Troca a faixa ao mudar de story (após áudio ativado)
+  useEffect(() => {
+    if (!audioOn) return;
+    crossfadeTo(storyIndex);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [storyIndex]);
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{
@@ -156,19 +145,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      {/* Audio element - você pode adicionar uma fonte de áudio aqui */}
-      <audio
-        ref={audioRef}
-        preload="auto"
-        loop
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
-      >
-        <source src="/sound/sound.mp3" type="audio/mpeg" />
-      </audio>
-
-      <Stories slides={[
+      <Stories
+        index={storyIndex}
+        onIndexChange={setStoryIndex}
+        slides={[
         /* Hero */
         <section key="hero" className="w-full flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
           <SplitText
@@ -186,121 +166,33 @@ export default function Home() {
             textAlign="center"
           />
 
-          <div className="scroll-hint mt-20 text-white/50 flex items-center gap-2">
+          {/* Ativar áudio (gesto necessário para o navegador liberar som) */}
+          <button
+            onClick={enableAudio}
+            className={`mt-10 inline-flex items-center gap-2 px-6 py-3 rounded-full border transition ${
+              audioOn
+                ? 'border-green-400/30 text-green-200 bg-green-500/10'
+                : 'border-red-400/40 text-white bg-red-500/20 hover:bg-red-500/30 animate-pulse'
+            }`}
+          >
+            {audioOn ? (
+              <>
+                <Volume2 className="w-5 h-5" /> Som ativado
+              </>
+            ) : (
+              <>
+                <Music className="w-5 h-5" /> Ativar áudio
+              </>
+            )}
+          </button>
+
+          <div className="scroll-hint mt-12 text-white/50 flex items-center gap-2">
             <span className="text-xs uppercase tracking-[0.3em]">toque para avançar</span>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </div>
         </section>,
-        /* Player */
-        <div key="player" className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-white/10">
-          {/* Capa em vinil */}
-          <div className="relative mb-6 flex items-center justify-center">
-            <div
-              className="vinyl relative w-60 h-60 rounded-full overflow-hidden shadow-2xl ring-4 ring-black/70"
-              style={{ animationPlayState: isPlaying ? 'running' : 'paused' }}
-            >
-              <Image
-                src="/images/1.jpeg"
-                alt="Album Cover"
-                width={400}
-                height={400}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  target.parentElement!.style.background = 'linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)';
-                  target.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-white"><svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg></div>';
-                }}
-              />
-              {/* Brilho radial do disco */}
-              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,transparent_40%,rgba(0,0,0,0.35)_70%)]" />
-              {/* Furo central */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-7 h-7 rounded-full bg-black/85 border-2 border-white/40" />
-              </div>
-            </div>
-          </div>
-
-          {/* Song Info */}
-          <div className="text-center mb-4">
-            <h2 className="text-xl font-bold text-white mb-1 truncate">Mudei Demais</h2>
-            <p className="text-gray-400 text-sm truncate">Luiz Henrique e Léo</p>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mb-4">
-            <div className="flex items-center mb-2">
-              <input
-                type="range"
-                min="0"
-                max={duration || 100}
-                value={currentTime}
-                onChange={handleSeek}
-                className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-                style={{
-                  background: `linear-gradient(to right, #7f1d1d 0%, #7f1d1d ${(currentTime / (duration || 100)) * 100}%, #4a5568 ${(currentTime / (duration || 100)) * 100}%, #4a5568 100%)`
-                }}
-              />
-            </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
-          </div>
-
-          {/* Play/Pause */}
-          <div className="flex items-center justify-center mb-4">
-            <button
-              onClick={togglePlay}
-              className="bg-red-800 text-white rounded-full p-4 hover:scale-105 hover:bg-red-900 transition-all shadow-lg"
-              aria-label={isPlaying ? 'Pausar' : 'Tocar'}
-            >
-              {isPlaying ? (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                </svg>
-              ) : (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              )}
-            </button>
-          </div>
-
-          {/* Bottom Controls */}
-          <div className="flex items-center justify-between">
-            {/* Like */}
-            <button 
-              onClick={() => setIsLiked(!isLiked)}
-              className={`transition-colors p-1 ${isLiked ? 'text-red-700' : 'text-gray-400 hover:text-red-600'}`}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-            </button>
-
-            {/* Volume */}
-            <div className="flex items-center space-x-1">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-gray-400">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-              </svg>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={volume}
-                onChange={handleVolumeChange}
-                className="w-16 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-                style={{
-                  background: `linear-gradient(to right, #7f1d1d 0%, #7f1d1d ${volume * 100}%, #4a5568 ${volume * 100}%, #4a5568 100%)`
-                }}
-              />
-            </div>
-          </div>
-        </div>,
         /* Nossos momentos */
         <Reveal key="momentos" className="w-full flex flex-col items-center">
           <h3 className="text-2xl font-bold text-white mb-1 font-serif-display">Nossos momentos</h3>

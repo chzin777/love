@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, createContext, useContext } from 'react';
+import { useEffect, useRef, createContext, useContext } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Indica se o slide atual (consumidor) está ativo na tela
@@ -9,17 +9,17 @@ export const useStoryActive = () => useContext(StoryActiveContext);
 
 interface StoriesProps {
   slides: React.ReactNode[];
+  index: number;
+  onIndexChange: (i: number) => void;
 }
 
-export default function Stories({ slides }: StoriesProps) {
-  const [index, setIndex] = useState(0);
+export default function Stories({ slides, index, onIndexChange }: StoriesProps) {
   const n = slides.length;
   const touchX = useRef<number | null>(null);
   const touchY = useRef<number | null>(null);
 
-  const go = (delta: number) =>
-    setIndex((prev) => Math.min(n - 1, Math.max(0, prev + delta)));
-  const goTo = (i: number) => setIndex(Math.min(n - 1, Math.max(0, i)));
+  const go = (delta: number) => onIndexChange(Math.min(n - 1, Math.max(0, index + delta)));
+  const goTo = (i: number) => onIndexChange(Math.min(n - 1, Math.max(0, i)));
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -29,7 +29,7 @@ export default function Stories({ slides }: StoriesProps) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [n]);
+  }, [n, index]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchX.current = e.touches[0].clientX;
@@ -39,7 +39,6 @@ export default function Stories({ slides }: StoriesProps) {
     if (touchX.current === null || touchY.current === null) return;
     const dx = e.changedTouches[0].clientX - touchX.current;
     const dy = e.changedTouches[0].clientY - touchY.current;
-    // Só conta como navegação se for um swipe horizontal claro
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
       go(dx < 0 ? 1 : -1);
     }
