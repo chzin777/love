@@ -12,40 +12,34 @@ interface Milestone {
 // 👉 Edite livremente datas e textos abaixo
 const milestones: Milestone[] = [
   {
-    date: '2024',
-    title: 'Nossos caminhos se cruzaram',
-    description: 'Já nos conhecíamos há quase um ano, dividindo pequenos momentos sem nos falarmos de verdade.',
-    emoji: '✨',
-  },
-  {
-    date: 'Início de 2025',
-    title: 'A primeira conversa',
-    description: 'Num dia comum, começamos a conversar… e tudo mudou.',
-    emoji: '💬',
+    date: '13 de março de 2025',
+    title: 'Nosso primeiro piquenique',
+    description: 'Onde tudo começou a florescer — risadas, conversa e a paz de estar perto de você.',
+    emoji: '🧺',
   },
   {
     date: '8 de abril de 2025',
-    title: 'Começamos a namorar',
-    description: 'Nosso amor floresceu rápido, leve e verdadeiro. Era nosso por destino.',
+    title: 'Começo do namoro',
+    description: 'O dia em que nos tornamos um. Nosso amor, oficial e verdadeiro.',
     emoji: '❤️',
   },
   {
-    date: 'Primeiro encontro',
-    title: 'Como se já nos conhecêssemos há anos',
-    description: 'Companheirismo, risadas e paz. Até escolhemos os nomes dos nossos filhos: Henrique e Melissa.',
-    emoji: '🥰',
-  },
-  {
-    date: 'Hoje',
-    title: 'Construindo nossa vida',
-    description: 'Escolhendo apartamento, sonhando com o casamento, imaginando nossa casa e nossas histórias.',
+    date: '8 de maio de 2025',
+    title: 'Alianças e o pedido oficial',
+    description: 'Um sim de coração, um compromisso para a vida. Selamos o nosso para sempre.',
     emoji: '💍',
   },
   {
-    date: '11 de dezembro de 2026',
-    title: 'Nosso apartamento',
-    description: 'O começo do nosso lar, do nosso espaço, da nossa vida juntos.',
-    emoji: '🏡',
+    date: '15 de junho de 2025',
+    title: 'Conheci seus pais',
+    description: 'Fui recebido pela sua família — mais um passo importante na nossa jornada juntos.',
+    emoji: '👨‍👩‍👧',
+  },
+  {
+    date: '18 de outubro de 2025',
+    title: 'Nossa primeira viagem juntos',
+    description: 'Novos lugares, mesma sintonia. Levamos nosso amor estrada afora.',
+    emoji: '✈️',
   },
 ];
 
