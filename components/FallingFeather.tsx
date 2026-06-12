@@ -2,42 +2,20 @@
 
 import { useEffect, useState } from 'react';
 
-// Pena desenhada com haste + barbas varridas para a ponta (nao parece folha)
+// Pena (Font Awesome "feather", CC BY 4.0), branca
 function FeatherShape() {
-  const cx = 60;
-  const topY = 22; // ponta
-  const vaneBottom = 182; // fim das barbas
-  const quillBottom = 236; // fim do calamo
-  const maxLen = 36;
-
-  const barbs: { x1: number; y1: number; x2: number; y2: number }[] = [];
-  for (let y = topY + 6; y <= vaneBottom; y += 4.5) {
-    const p = (y - topY) / (vaneBottom - topY); // 0 ponta -> 1 base
-    const len = maxLen * Math.pow(Math.sin(Math.min(p, 1) * Math.PI), 0.6);
-    const upY = y - len * 0.55; // varre em direcao a ponta
-    barbs.push({ x1: cx, y1: y, x2: cx - len, y2: upY });
-    barbs.push({ x1: cx, y1: y, x2: cx + len, y2: upY });
-  }
-
   return (
     <svg
       className="feather-svg"
-      width="80"
-      height="160"
-      viewBox="0 0 120 250"
-      fill="none"
+      width="100"
+      height="100"
+      viewBox="0 0 512 512"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <g stroke="white" strokeLinecap="round">
-        {/* Barbas */}
-        <g strokeWidth="1.6">
-          {barbs.map((b, i) => (
-            <line key={i} x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} />
-          ))}
-        </g>
-        {/* Haste + calamo */}
-        <line x1={cx} y1={topY} x2={cx} y2={quillBottom} strokeWidth="2.6" />
-      </g>
+      <path
+        fill="white"
+        d="M278.5 215.6L23 471c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l57-57 68 0c49.7 0 97.9-14.4 139-41c11.1-7.2 5.5-23-7.8-23c-5.1 0-9.2-4.1-9.2-9.2c0-4.1 2.7-7.6 6.5-8.8l81-24.3c2.5-.8 4.8-2.1 6.7-4l22.4-22.4c10.1-10.1 2.9-27.3-11.3-27.3l-32.2 0c-5.1 0-9.2-4.1-9.2-9.2c0-4.1 2.7-7.6 6.5-8.8l112-33.6c4-1.2 7.4-3.9 9.3-7.7C506.4 207.6 512 184.1 512 160c0-41-16.3-80.3-45.3-109.3l-5.5-5.5C432.3 16.3 393 0 352 0s-80.3 16.3-109.3 45.3L139 149C91 197 64 262.1 64 330l0 55.3L253.6 195.8c6.2-6.2 16.4-6.2 22.6 0c5.4 5.4 6.1 13.6 2.2 19.8z"
+      />
     </svg>
   );
 }
