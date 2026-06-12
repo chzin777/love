@@ -40,7 +40,7 @@ export default function Home() {
   const VOL = 0.85;
   const FADE_MS = 900;
   // Offset de início (em segundos) por número da faixa
-  const START_OFFSETS: Record<number, number> = { 1: 15, 2: 13, 4: 42, 5: 40, 7: 50, 8: 85 };
+  const START_OFFSETS: Record<number, number> = { 1: 15, 2: 13, 4: 42, 5: 40, 7: 50, 8: 85, 9: 14 };
   const trackFor = (i: number) => `/sound/${i + 1}.mp3`;
   const offsetFor = (i: number) => START_OFFSETS[i + 1] ?? 0;
 
