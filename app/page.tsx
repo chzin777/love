@@ -38,89 +38,127 @@ export default function Home() {
 
   // ---- Música por story, com crossfade ----
   const VOL = 0.85;
-  const FADE_MS = 900;
   // Offset de início (em segundos) por número da faixa
   const START_OFFSETS: Record<number, number> = { 1: 15, 2: 13, 4: 42, 5: 40, 7: 50, 8: 85, 9: 14 };
   const trackFor = (i: number) => `/sound/${i + 1}.mp3`;
   const offsetFor = (i: number) => START_OFFSETS[i + 1] ?? 0;
 
-  const channelsRef = useRef<{ a: HTMLAudioElement; b: HTMLAudioElement; active: 0 | 1 } | null>(null);
-  const fadeRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const FADE_S = 1.5; // duração do crossfade em segundos
 
-  const ensureChannels = () => {
-    if (!channelsRef.current && typeof Audio !== 'undefined') {
+  // Engine de áudio: 2 canais, ramp contínuo (rAF) com curva equal-power
+  const engineRef = useRef<{
+    audios: HTMLAudioElement[];
+    gains: number[]; // 0..1 por canal
+    tracks: (number | null)[];
+    desired: number | null;
+    raf: number | null;
+    last: number;
+  } | null>(null);
+
+  const initEngine = () => {
+    if (engineRef.current || typeof Audio === 'undefined') return engineRef.current;
+    const mk = () => {
       const a = new Audio();
-      const b = new Audio();
       a.loop = true;
-      b.loop = true;
       a.preload = 'auto';
-      b.preload = 'auto';
-      channelsRef.current = { a, b, active: 0 };
-    }
-    return channelsRef.current;
-  };
-
-  const loadTrack = (audio: HTMLAudioElement, i: number) => {
-    audio.src = trackFor(i);
-    const seek = () => {
-      try {
-        audio.currentTime = offsetFor(i);
-      } catch {
-        /* noop */
-      }
+      a.volume = 0;
+      return a;
     };
-    if (audio.readyState >= 1) seek();
-    else audio.addEventListener('loadedmetadata', seek, { once: true });
+    engineRef.current = {
+      audios: [mk(), mk()],
+      gains: [0, 0],
+      tracks: [null, null],
+      desired: null,
+      raf: null,
+      last: 0,
+    };
+    return engineRef.current;
   };
 
-  const crossfadeTo = (i: number, immediate = false) => {
-    const ch = ensureChannels();
-    if (!ch) return;
-    const cur = ch.active === 0 ? ch.a : ch.b;
-    const nxt = ch.active === 0 ? ch.b : ch.a;
-
-    loadTrack(nxt, i);
-    nxt.volume = immediate ? VOL : 0;
-    nxt.play().catch(() => {});
-
-    if (fadeRef.current) clearInterval(fadeRef.current);
-    if (!immediate) {
-      const steps = 30;
-      let s = 0;
-      fadeRef.current = setInterval(() => {
-        s++;
-        const p = s / steps;
-        nxt.volume = Math.min(VOL, VOL * p);
-        cur.volume = Math.max(0, VOL * (1 - p));
-        if (s >= steps) {
-          if (fadeRef.current) clearInterval(fadeRef.current);
-          cur.pause();
-        }
-      }, FADE_MS / steps);
-    } else {
-      cur.pause();
+  const tickRef = useRef<(now: number) => void>(() => {});
+  tickRef.current = (now: number) => {
+    const e = engineRef.current;
+    if (!e) return;
+    const dt = e.last ? (now - e.last) / 1000 : 0;
+    e.last = now;
+    const rate = FADE_S > 0 ? dt / FADE_S : 1;
+    let busy = false;
+    for (let i = 0; i < e.audios.length; i++) {
+      const target = e.tracks[i] !== null && e.tracks[i] === e.desired ? 1 : 0;
+      if (e.gains[i] < target) e.gains[i] = Math.min(target, e.gains[i] + rate);
+      else if (e.gains[i] > target) e.gains[i] = Math.max(target, e.gains[i] - rate);
+      if (e.gains[i] !== target) busy = true;
+      // curva equal-power evita queda de volume no meio do crossfade
+      e.audios[i].volume = Math.sin((e.gains[i] * Math.PI) / 2) * VOL;
+      if (e.gains[i] <= 0.0005 && e.tracks[i] !== e.desired && !e.audios[i].paused) {
+        e.audios[i].pause();
+      }
     }
-    ch.active = ch.active === 0 ? 1 : 0;
+    if (busy) e.raf = requestAnimationFrame(tickRef.current);
+    else {
+      e.raf = null;
+      e.last = 0;
+    }
+  };
+
+  const playTrack = (track: number) => {
+    const e = initEngine();
+    if (!e) return;
+    e.desired = track;
+    let idx = e.tracks.findIndex((t) => t === track);
+    if (idx === -1) {
+      // carrega no canal mais silencioso (evita corte em canal audível)
+      idx = e.gains[0] <= e.gains[1] ? 0 : 1;
+      const a = e.audios[idx];
+      e.tracks[idx] = track;
+      e.gains[idx] = 0;
+      a.volume = 0;
+      a.src = trackFor(track);
+      const off = offsetFor(track);
+      const seek = () => {
+        try {
+          a.currentTime = off;
+        } catch {
+          /* noop */
+        }
+      };
+      if (a.readyState >= 1) seek();
+      else a.addEventListener('loadedmetadata', seek, { once: true });
+      a.play().catch(() => {});
+    } else {
+      e.audios[idx].play().catch(() => {});
+    }
+    if (e.raf === null) {
+      e.last = 0;
+      e.raf = requestAnimationFrame(tickRef.current);
+    }
   };
 
   // Ativa o áudio no gesto do usuário (botão), tocando a faixa do story atual
   const enableAudio = () => {
     if (audioOn) return;
-    const ch = ensureChannels();
-    if (!ch) return;
-    const first = ch.active === 0 ? ch.a : ch.b;
-    loadTrack(first, storyIndex);
-    first.volume = VOL;
-    first.play().catch(() => {});
+    initEngine();
+    playTrack(storyIndex);
     setAudioOn(true);
   };
 
   // Troca a faixa ao mudar de story (após áudio ativado)
   useEffect(() => {
     if (!audioOn) return;
-    crossfadeTo(storyIndex);
+    playTrack(storyIndex);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storyIndex]);
+
+  // Limpeza ao desmontar
+  useEffect(() => {
+    return () => {
+      const e = engineRef.current;
+      if (e) {
+        if (e.raf) cancelAnimationFrame(e.raf);
+        e.audios.forEach((a) => a.pause());
+      }
+    };
+  }, []);
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{
