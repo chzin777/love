@@ -113,6 +113,8 @@ export default function Home() {
       e.tracks[idx] = track;
       e.gains[idx] = 0;
       a.volume = 0;
+      // pausa antes de trocar a fonte: resolve o play() pendente e evita AbortError
+      a.pause();
       a.src = trackFor(track);
       const off = offsetFor(track);
       const seek = () => {
@@ -124,6 +126,7 @@ export default function Home() {
       };
       if (a.readyState >= 1) seek();
       else a.addEventListener('loadedmetadata', seek, { once: true });
+      // play síncrono (preserva o gesto do usuário no 1º áudio)
       a.play().catch(() => {});
     } else {
       e.audios[idx].play().catch(() => {});
