@@ -340,7 +340,7 @@ export default function Home() {
                 </p>
                 
                 <p className="text-lg">
-                  Hoje, seguimos caminhando juntos, planejando nossa vida: escolhendo apartamento, sonhando com nosso casamento, imaginando a casa com nossos móveis, nossas histórias e nossos sonhos.
+                  Hoje, seguimos caminhando juntos, planejando nossa vida: já compramos o nosso apartamento, sonhando com nosso casamento, imaginando a casa com nossos móveis, nossas histórias e nossos sonhos.
                 </p>
                 
                 <p className="text-lg font-medium text-red-200">
