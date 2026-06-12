@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, createContext, useContext } from 'react';
+import { useEffect, useRef, useState, createContext, useContext } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Indica se o slide atual (consumidor) está ativo na tela
@@ -11,16 +11,23 @@ interface StoriesProps {
   slides: React.ReactNode[];
   index: number;
   onIndexChange: (i: number) => void;
+  // Duração (ms) de auto-avanço por slide; null = não avança sozinho
+  durations?: (number | null)[];
 }
 
-export default function Stories({ slides, index, onIndexChange }: StoriesProps) {
+export default function Stories({ slides, index, onIndexChange, durations }: StoriesProps) {
   const n = slides.length;
   const touchX = useRef<number | null>(null);
   const touchY = useRef<number | null>(null);
+  const [held, setHeld] = useState(false);
 
   const go = (delta: number) => onIndexChange(Math.min(n - 1, Math.max(0, index + delta)));
   const goTo = (i: number) => onIndexChange(Math.min(n - 1, Math.max(0, i)));
 
+  const duration = durations?.[index] ?? null;
+  const autoAdvance = duration !== null && index < n - 1;
+
+  // Teclado
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
@@ -30,6 +37,14 @@ export default function Stories({ slides, index, onIndexChange }: StoriesProps) 
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [n, index]);
+
+  // Auto-avanço (pausa enquanto segura a tela)
+  useEffect(() => {
+    if (!autoAdvance || held) return;
+    const t = setTimeout(() => go(1), duration as number);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, held, autoAdvance, duration]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     touchX.current = e.touches[0].clientX;
@@ -51,22 +66,43 @@ export default function Stories({ slides, index, onIndexChange }: StoriesProps) 
       className="fixed inset-0 z-10 overflow-hidden"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
+      // Segurar pausa o auto-avanço (a música continua)
+      onPointerDown={() => setHeld(true)}
+      onPointerUp={() => setHeld(false)}
+      onPointerCancel={() => setHeld(false)}
+      onPointerLeave={() => setHeld(false)}
     >
       {/* Barras de progresso (estilo stories) */}
       <div className="absolute top-0 left-0 right-0 z-30 flex gap-1.5 px-3 pt-3">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goTo(i)}
-            className="h-1 flex-1 rounded-full bg-white/25 overflow-hidden"
-            aria-label={`Ir para o ${i + 1}`}
-          >
-            <span
-              className="block h-full bg-white transition-all duration-500"
-              style={{ width: i <= index ? '100%' : '0%' }}
-            />
-          </button>
-        ))}
+        {slides.map((_, i) => {
+          const filled = i < index;
+          const isCurrent = i === index;
+          return (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className="h-1 flex-1 rounded-full bg-white/25 overflow-hidden"
+              aria-label={`Ir para o ${i + 1}`}
+            >
+              {isCurrent && autoAdvance ? (
+                <span
+                  key={`fill-${index}`}
+                  className="block h-full bg-white"
+                  style={{
+                    width: '0%',
+                    animation: `storyFill ${duration}ms linear forwards`,
+                    animationPlayState: held ? 'paused' : 'running',
+                  }}
+                />
+              ) : (
+                <span
+                  className="block h-full bg-white"
+                  style={{ width: filled || isCurrent ? '100%' : '0%' }}
+                />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Trilho horizontal (transição estilo stories) */}
@@ -102,12 +138,23 @@ export default function Stories({ slides, index, onIndexChange }: StoriesProps) 
       {index < n - 1 && (
         <button
           onClick={() => go(1)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition animate-pulse"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition"
           aria-label="Próximo"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
       )}
+
+      <style jsx>{`
+        @keyframes storyFill {
+          from {
+            width: 0%;
+          }
+          to {
+            width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
 }

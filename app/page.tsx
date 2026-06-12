@@ -40,7 +40,7 @@ export default function Home() {
   // ---- Música por story, com crossfade ----
   const VOL = 0.85;
   // Offset de início (em segundos) por número da faixa
-  const START_OFFSETS: Record<number, number> = { 1: 15, 2: 13, 3: 6, 4: 42, 5: 40, 7: 50, 8: 85, 9: 14 };
+  const START_OFFSETS: Record<number, number> = { 1: 15, 2: 13, 3: 6, 4: 42, 5: 40, 7: 50, 8: 13, 9: 14 };
   const trackFor = (i: number) => `/sound/${i + 1}.mp3`;
   const offsetFor = (i: number) => START_OFFSETS[i + 1] ?? 0;
 
@@ -190,6 +190,17 @@ export default function Home() {
       <Stories
         index={storyIndex}
         onIndexChange={setStoryIndex}
+        durations={[
+          30000, // hero
+          null,  // nossos momentos (interativo)
+          30000, // juntos há
+          30000, // countdown
+          45000, // nossa história (texto longo)
+          45000, // linha do tempo
+          null,  // razões (interativo)
+          null,  // jogo de palavras (interativo)
+          null,  // final (chuva de fotos)
+        ]}
         slides={[
         /* Hero */
         <section key="hero" className="w-full flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
