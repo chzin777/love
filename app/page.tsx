@@ -24,7 +24,7 @@ export default function Home() {
   const [showFeather, setShowFeather] = useState(true);
   const [visibleReasons, setVisibleReasons] = useState(50);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const photos = useMemo(() => [1, 2, 3, 4, 5], []);
+  const photos = useMemo(() => Array.from({ length: 17 }, (_, i) => i + 1), []);
   // Memoizado: o contador re-renderiza a cada 1s; sem isso o Stack reiniciaria sempre
   const stackCards = useMemo(
     () =>
