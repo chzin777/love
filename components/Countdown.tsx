@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { House, PartyPopper, Heart, type LucideIcon } from 'lucide-react';
+import CountUp from './CountUp';
+import { useStoryActive } from './Stories';
 
 interface CountdownProps {
   /** Data alvo no formato ISO, ex: '2026-12-11T00:00:00' */
@@ -36,6 +38,10 @@ const calc = (target: string): TimeLeft => {
 export default function Countdown({ target, title, subtitle, icon: Icon = House }: CountdownProps) {
   // Inicia null para evitar mismatch de hidratação (servidor x cliente)
   const [time, setTime] = useState<TimeLeft | null>(null);
+  const active = useStoryActive();
+  // idle -> animating (CountUp ao chegar no slide) -> done (tick ao vivo)
+  const [phase, setPhase] = useState<'idle' | 'animating' | 'done'>('idle');
+  const [snap, setSnap] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
     setTime(calc(target));
@@ -43,12 +49,20 @@ export default function Countdown({ target, title, subtitle, icon: Icon = House 
     return () => clearInterval(interval);
   }, [target]);
 
+  // Ao ativar o slide, congela um snapshot e dispara o CountUp
+  useEffect(() => {
+    if (active && phase === 'idle' && time) {
+      setSnap(time);
+      setPhase('animating');
+    }
+  }, [active, phase, time]);
+
   const units = time
     ? [
-        { label: 'dias', value: time.days },
-        { label: 'horas', value: time.hours },
-        { label: 'min', value: time.minutes },
-        { label: 'seg', value: time.seconds },
+        { label: 'dias', value: time.days, snap: snap?.days ?? 0 },
+        { label: 'horas', value: time.hours, snap: snap?.hours ?? 0 },
+        { label: 'min', value: time.minutes, snap: snap?.minutes ?? 0 },
+        { label: 'seg', value: time.seconds, snap: snap?.seconds ?? 0 },
       ]
     : [];
 
@@ -74,7 +88,20 @@ export default function Countdown({ target, title, subtitle, icon: Icon = House 
               className="bg-gradient-to-b from-red-900/40 to-black/40 rounded-2xl py-4 border border-red-400/10"
             >
               <p className="text-2xl sm:text-3xl font-bold text-white font-mono tabular-nums text-center">
-                {time ? u.value.toString().padStart(2, '0') : '--'}
+                {phase === 'animating' && snap ? (
+                  <CountUp
+                    from={0}
+                    to={u.snap}
+                    duration={1.6}
+                    startWhen
+                    className="inline-block"
+                    onEnd={u.label === 'seg' ? () => setPhase('done') : undefined}
+                  />
+                ) : time ? (
+                  u.value.toString().padStart(2, '0')
+                ) : (
+                  '--'
+                )}
               </p>
               <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider text-center mt-1">
                 {u.label}

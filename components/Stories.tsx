@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+// Indica se o slide atual (consumidor) está ativo na tela
+const StoryActiveContext = createContext(true);
+export const useStoryActive = () => useContext(StoryActiveContext);
 
 interface StoriesProps {
   slides: React.ReactNode[];
@@ -78,7 +82,9 @@ export default function Stories({ slides }: StoriesProps) {
           aria-hidden={i !== index}
         >
           <div className="min-h-full w-full flex flex-col items-center justify-center px-5 pt-16 pb-20">
-            {slide}
+            <StoryActiveContext.Provider value={i === index}>
+              {slide}
+            </StoryActiveContext.Provider>
           </div>
         </div>
       ))}

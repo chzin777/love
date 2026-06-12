@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import CountUp from './CountUp';
 import Reveal from './Reveal';
+import { useStoryActive } from './Stories';
 
 const START = new Date('2025-04-08T00:00:00');
 
@@ -12,6 +13,7 @@ const START = new Date('2025-04-08T00:00:00');
 export default function TogetherCounter() {
   const [clock, setClock] = useState('');
   const [days, setDays] = useState(0);
+  const active = useStoryActive();
 
   useEffect(() => {
     const tick = () => {
@@ -39,6 +41,7 @@ export default function TogetherCounter() {
                 to={days}
                 duration={2.2}
                 separator="."
+                startWhen={active}
                 className="text-white font-sans font-bold text-6xl tabular-nums leading-none"
               />
             )}

@@ -57,9 +57,13 @@ export default function Home() {
     }
   };
 
+  const START_AT = 15; // música começa em 0:15
+
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
+      audioRef.current.currentTime = START_AT;
+      setCurrentTime(START_AT);
     }
   };
 
@@ -87,16 +91,16 @@ export default function Home() {
 
   const skipPrevious = () => {
     if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      setCurrentTime(0);
+      audioRef.current.currentTime = START_AT;
+      setCurrentTime(START_AT);
     }
   };
 
   const skipNext = () => {
     // Simulação - em um player real, mudaria para a próxima música
     if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      setCurrentTime(0);
+      audioRef.current.currentTime = START_AT;
+      setCurrentTime(START_AT);
     }
   };
 
