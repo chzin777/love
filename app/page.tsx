@@ -191,7 +191,7 @@ export default function Home() {
         index={storyIndex}
         onIndexChange={setStoryIndex}
         durations={[
-          10000, // hero
+          15000, // hero
           null,  // nossos momentos (interativo)
           10000, // juntos há
           13000, // countdown
