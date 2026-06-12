@@ -12,6 +12,7 @@ import TogetherCounter from "../components/TogetherCounter";
 import Countdown from "../components/Countdown";
 import Timeline from "../components/Timeline";
 import Reveal from "../components/Reveal";
+import Stories from "../components/Stories";
 import { generateReasons } from "../utils/reasons";
 
 export default function Home() {
@@ -132,9 +133,9 @@ export default function Home() {
         <source src="/sound/sound.mp3" type="audio/mpeg" />
       </audio>
 
-      <div className="flex flex-col items-center justify-center p-4 px-6 relative z-10">
-        {/* Hero romântico */}
-        <section className="min-h-screen w-full flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
+      <Stories slides={[
+        /* Hero */
+        <section key="hero" className="w-full flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
           <SplitText
             text="Para o amor da minha vida"
             tag="h1"
@@ -150,16 +151,15 @@ export default function Home() {
             textAlign="center"
           />
 
-          <div className="scroll-hint mt-20 text-white/50 flex flex-col items-center gap-2">
-            <span className="text-xs uppercase tracking-[0.3em]">deslize</span>
+          <div className="scroll-hint mt-20 text-white/50 flex items-center gap-2">
+            <span className="text-xs uppercase tracking-[0.3em]">toque para avançar</span>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M19 12l-7 7-7-7" />
+              <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </div>
-        </section>
-
-        {/* Player Card */}
-        <div className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-white/10">
+        </section>,
+        /* Player */
+        <div key="player" className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-white/10">
           {/* Album Art */}
           <div className="relative mb-6">
             <div className="aspect-square rounded-xl overflow-hidden shadow-2xl">
@@ -291,10 +291,9 @@ export default function Home() {
               />
             </div>
           </div>
-        </div>
-
-        {/* Pilha de fotos arrastáveis */}
-        <Reveal className="mt-12 w-full flex flex-col items-center">
+        </div>,
+        /* Nossos momentos */
+        <Reveal key="momentos" className="w-full flex flex-col items-center">
           <h3 className="text-2xl font-bold text-white mb-1 font-serif-display">Nossos momentos</h3>
           <p className="text-white/50 text-xs mb-6 inline-flex items-center gap-1">arraste ou toque para passar <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400" /></p>
           <div style={{ width: 'min(86vw, 380px)', height: 'min(86vw, 380px)' }}>
@@ -304,22 +303,19 @@ export default function Home() {
               cards={stackCards}
             />
           </div>
-        </Reveal>
-
-        {/* Contador de tempo */}
-        <TogetherCounter />
-
-        {/* Countdown para o apartamento */}
-        <Reveal className="mt-8 w-full max-w-sm">
+        </Reveal>,
+        /* Juntos há */
+        <TogetherCounter key="counter" />,
+        /* Countdown */
+        <Reveal key="countdown" className="w-full max-w-sm">
           <Countdown
             target="2026-12-11T00:00:00"
             title="Nosso apartamento"
             subtitle="11 de dezembro de 2026, nosso primeiro lar"
           />
-        </Reveal>
-
-        {/* Nossa História */}
-        <div className="mt-8 w-full max-w-2xl px-4">
+        </Reveal>,
+        /* Nossa História */
+        <div key="historia" className="w-full max-w-2xl px-4">
             <div className="bg-black/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/10 text-white">
               <div className="text-center mb-8">
                 <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 font-serif-display">Nossa História</h2>
@@ -352,20 +348,18 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
-
-        {/* Linha do Tempo */}
-        <div className="mt-16 w-full max-w-3xl px-2 sm:px-4">
+          </div>,
+        /* Linha do Tempo */
+        <div key="timeline" className="w-full max-w-3xl px-2 sm:px-4">
           <Reveal className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 font-serif-display">Nossa Linha do Tempo</h2>
             <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent mx-auto" />
             <p className="text-white/60 text-sm mt-3">Cada momento que nos trouxe até aqui</p>
           </Reveal>
           <Timeline />
-        </div>
-
-        {/* Razões de te amar */}
-        <div className="mt-8 w-full max-w-2xl px-4">
+        </div>,
+        /* Razões de te amar */
+        <div key="razoes" className="w-full max-w-2xl px-4">
           <div className="bg-black/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/10 text-white">
             <div className="text-center mb-8">
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 font-serif-display">Razões de te amar</h2>
@@ -414,14 +408,13 @@ export default function Home() {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Rodapé */}
-        <footer className="mt-16 mb-10 text-center">
-          <p className="font-script text-3xl text-red-200 mb-2">Te amo, hoje e sempre</p>
+        </div>,
+        /* Rodapé */
+        <footer key="footer" className="text-center">
+          <p className="font-script text-4xl sm:text-5xl text-red-200 mb-3">Te amo, hoje e sempre</p>
           <p className="text-white/40 text-xs inline-flex items-center gap-1">Feito com <Heart className="heartbeat w-3.5 h-3.5 text-red-500 fill-red-500" /> só para você</p>
-        </footer>
-      </div>
+        </footer>,
+      ]} />
 
       {/* Efeitos visuais */}
       <PetalEffect />
