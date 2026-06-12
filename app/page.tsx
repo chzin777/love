@@ -41,14 +41,31 @@ export default function Home() {
   );
   const reasons = useMemo(() => generateReasons(), []);
 
+  const seekedRef = useRef(false);
+
+  // Toca e, assim que o playback começa de fato, posiciona em 0:15 (1ª vez)
+  const startMusic = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.play()
+      .then(() => {
+        if (!seekedRef.current) {
+          a.currentTime = START_AT;
+          seekedRef.current = true;
+        }
+        setIsPlaying(true);
+      })
+      .catch(() => {});
+  };
+
   const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
+    const a = audioRef.current;
+    if (!a) return;
+    if (isPlaying) {
+      a.pause();
+      setIsPlaying(false);
+    } else {
+      startMusic();
     }
   };
 
@@ -61,16 +78,20 @@ export default function Home() {
   const START_AT = 15; // música começa em 0:15
 
   const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
-      audioRef.current.currentTime = START_AT;
+    const a = audioRef.current;
+    if (!a) return;
+    setDuration(a.duration);
+    if (!seekedRef.current) {
+      a.currentTime = START_AT;
       setCurrentTime(START_AT);
+      seekedRef.current = true;
     }
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(e.target.value);
     setCurrentTime(newTime);
+    seekedRef.current = true; // respeita ajuste manual
     if (audioRef.current) {
       audioRef.current.currentTime = newTime;
     }
@@ -95,10 +116,7 @@ export default function Home() {
     const startOnGesture = () => {
       const a = audioRef.current;
       if (a && a.paused) {
-        a.currentTime = START_AT;
-        a.play()
-          .then(() => setIsPlaying(true))
-          .catch(() => {});
+        startMusic();
       }
       window.removeEventListener('pointerdown', startOnGesture);
       window.removeEventListener('keydown', startOnGesture);
@@ -112,6 +130,7 @@ export default function Home() {
       window.removeEventListener('keydown', startOnGesture);
       window.removeEventListener('touchstart', startOnGesture);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -140,6 +159,8 @@ export default function Home() {
       {/* Audio element - você pode adicionar uma fonte de áudio aqui */}
       <audio
         ref={audioRef}
+        preload="auto"
+        loop
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setIsPlaying(false)}

@@ -12,7 +12,7 @@ const PUZZLES: Puzzle[] = [
   { answer: 'AMOR', hint: 'O que a gente sente um pelo outro' },
   { answer: 'MELISSA', hint: 'O nome da nossa futura filha' },
   { answer: 'HENRIQUE', hint: 'O nome do nosso futuro filho' },
-  { answer: 'PIQUENIQUE', hint: 'Onde tudo começou' },
+  { answer: 'FACULDADE', hint: 'Onde tudo começou' },
   { answer: 'APARTAMENTO', hint: 'Nosso primeiro lar' },
   { answer: 'CASAMENTO', hint: 'Nosso próximo grande passo' },
 ];
