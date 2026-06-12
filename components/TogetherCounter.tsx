@@ -32,6 +32,9 @@ export default function TogetherCounter() {
 
   return (
     <Reveal className="mt-8 w-full max-w-sm">
+      <p className="text-center font-script text-3xl sm:text-4xl text-red-200 mb-5 leading-tight">
+        NOSSO AMOR É PAPO DE UMDAIA!
+      </p>
       <div className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 w-full border border-white/10 shadow-2xl">
         <div className="text-center">
           <h3 className="text-xl font-semibold text-white mb-3 font-serif-display">Juntos há</h3>

@@ -13,6 +13,7 @@ import Timeline from "../components/Timeline";
 import Reveal from "../components/Reveal";
 import Stories from "../components/Stories";
 import WordGame from "../components/WordGame";
+import FinalStory from "../components/FinalStory";
 import { generateReasons } from "../utils/reasons";
 
 export default function Home() {
@@ -39,7 +40,7 @@ export default function Home() {
   // ---- Música por story, com crossfade ----
   const VOL = 0.85;
   // Offset de início (em segundos) por número da faixa
-  const START_OFFSETS: Record<number, number> = { 1: 15, 2: 13, 4: 42, 5: 40, 7: 50, 8: 85, 9: 14 };
+  const START_OFFSETS: Record<number, number> = { 1: 15, 2: 13, 3: 6, 4: 42, 5: 40, 7: 50, 8: 85, 9: 14 };
   const trackFor = (i: number) => `/sound/${i + 1}.mp3`;
   const offsetFor = (i: number) => START_OFFSETS[i + 1] ?? 0;
 
@@ -354,10 +355,7 @@ export default function Home() {
         /* Jogo de palavras */
         <WordGame key="wordgame" />,
         /* Rodapé */
-        <footer key="footer" className="text-center">
-          <p className="font-script text-4xl sm:text-5xl text-red-200 mb-3">Te amo, hoje e sempre</p>
-          <p className="text-white/40 text-xs inline-flex items-center gap-1">Feito com <Heart className="heartbeat w-3.5 h-3.5 text-red-500 fill-red-500" /> só para você</p>
-        </footer>,
+        <FinalStory key="final" photos={photos} />,
       ]} />
 
       {/* Efeitos visuais */}

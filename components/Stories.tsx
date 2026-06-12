@@ -77,7 +77,7 @@ export default function Stories({ slides, index, onIndexChange }: StoriesProps) 
         {slides.map((slide, i) => (
           <div
             key={i}
-            className="w-full h-full flex-shrink-0 overflow-y-auto"
+            className="relative w-full h-full flex-shrink-0 overflow-y-auto"
             aria-hidden={i !== index}
           >
             <div className="min-h-full w-full flex flex-col items-center justify-center px-5 pt-16 pb-20">
