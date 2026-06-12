@@ -2,6 +2,46 @@
 
 import { useEffect, useState } from 'react';
 
+// Pena desenhada com haste + barbas varridas para a ponta (nao parece folha)
+function FeatherShape() {
+  const cx = 60;
+  const topY = 22; // ponta
+  const vaneBottom = 182; // fim das barbas
+  const quillBottom = 236; // fim do calamo
+  const maxLen = 36;
+
+  const barbs: { x1: number; y1: number; x2: number; y2: number }[] = [];
+  for (let y = topY + 6; y <= vaneBottom; y += 4.5) {
+    const p = (y - topY) / (vaneBottom - topY); // 0 ponta -> 1 base
+    const len = maxLen * Math.pow(Math.sin(Math.min(p, 1) * Math.PI), 0.6);
+    const upY = y - len * 0.55; // varre em direcao a ponta
+    barbs.push({ x1: cx, y1: y, x2: cx - len, y2: upY });
+    barbs.push({ x1: cx, y1: y, x2: cx + len, y2: upY });
+  }
+
+  return (
+    <svg
+      className="feather-svg"
+      width="80"
+      height="160"
+      viewBox="0 0 120 250"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g stroke="white" strokeLinecap="round">
+        {/* Barbas */}
+        <g strokeWidth="1.6">
+          {barbs.map((b, i) => (
+            <line key={i} x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} />
+          ))}
+        </g>
+        {/* Haste + calamo */}
+        <line x1={cx} y1={topY} x2={cx} y2={quillBottom} strokeWidth="2.6" />
+      </g>
+    </svg>
+  );
+}
+
 interface FeatherProps {
   onComplete?: () => void;
 }
@@ -26,48 +66,7 @@ export default function FallingFeather({ onComplete }: FeatherProps) {
       {/* Pena caindo */}
       <div className="feather-container">
         <div className="feather">
-          {/* Silhueta de pena (pluma de ganso), branca */}
-          <svg
-            className="feather-svg"
-            width="80"
-            height="150"
-            viewBox="0 0 120 220"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {/* Pluma */}
-            <path
-              d="M60 6
-                 C 84 40, 98 86, 90 128
-                 C 86 150, 75 166, 63 176
-                 L 63 214
-                 L 57 214
-                 L 57 176
-                 C 45 166, 34 150, 30 128
-                 C 22 86, 36 40, 60 6 Z"
-              fill="white"
-            />
-            {/* Haste central, leve sombra para dar profundidade */}
-            <path
-              d="M60 18 L60 176"
-              stroke="rgba(0,0,0,0.10)"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            {/* Barbas: pequenas separacoes diagonais */}
-            <g stroke="rgba(0,0,0,0.08)" strokeWidth="1.4" strokeLinecap="round">
-              <path d="M60 40 L42 54" />
-              <path d="M60 40 L78 54" />
-              <path d="M60 64 L38 80" />
-              <path d="M60 64 L82 80" />
-              <path d="M60 90 L36 106" />
-              <path d="M60 90 L84 106" />
-              <path d="M60 116 L40 130" />
-              <path d="M60 116 L80 130" />
-              <path d="M60 140 L46 152" />
-              <path d="M60 140 L74 152" />
-            </g>
-          </svg>
+          <FeatherShape />
         </div>
       </div>
 
