@@ -1,10 +1,16 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import DarkVeil from "../components/DarkVeil";
 import FallingFeather from "../components/FallingFeather";
 import PetalEffect from "../components/PetalEffect";
+import SplitText from "../components/SplitText";
+import Stack from "../components/Stack";
+import CountUp from "../components/CountUp";
+import Countdown from "../components/Countdown";
+import Timeline from "../components/Timeline";
+import Reveal from "../components/Reveal";
 import { generateReasons } from "../utils/reasons";
 
 export default function Home() {
@@ -14,6 +20,7 @@ export default function Home() {
   const [volume, setVolume] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [timeCounter, setTimeCounter] = useState('');
+  const [totalDays, setTotalDays] = useState(0);
   const [showPhotos, setShowPhotos] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showFeather, setShowFeather] = useState(true);
@@ -22,8 +29,21 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const slideshowRef = useRef<HTMLDivElement>(null);
   const storyRef = useRef<HTMLDivElement>(null);
-  const photos = [1, 2, 3, 4, 5];
-  const reasons = generateReasons();
+  const photos = useMemo(() => [1, 2, 3, 4, 5], []);
+  // Memoizado: o contador re-renderiza a cada 1s; sem isso o Stack reiniciaria sempre
+  const stackCards = useMemo(
+    () =>
+      photos.map((num) => (
+        <img
+          key={num}
+          src={`/images/${num}.jpeg`}
+          alt={`Momento ${num}`}
+          className="w-full h-full object-cover pointer-events-none"
+        />
+      )),
+    [photos]
+  );
+  const reasons = useMemo(() => generateReasons(), []);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -97,10 +117,8 @@ export default function Home() {
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      let timeString = '';
-      if (totalDays > 0) timeString += `${totalDays} dia${totalDays > 1 ? 's' : ''}, `;
-      timeString += `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
+      setTotalDays(totalDays);
+      const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
       setTimeCounter(timeString);
     };
 
@@ -148,7 +166,54 @@ export default function Home() {
         <source src="/sound/sound.mp3" type="audio/mpeg" />
       </audio>
 
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 px-6 relative z-10">
+      <div className="flex flex-col items-center justify-center p-4 px-6 relative z-10">
+        {/* Hero romântico */}
+        <section className="min-h-screen w-full flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
+          <SplitText
+            text="Para o amor da minha vida"
+            tag="p"
+            className="font-script text-2xl sm:text-3xl text-red-200/90 mb-4"
+            delay={40}
+            duration={1}
+            ease="power3.out"
+            splitType="words"
+            from={{ opacity: 0, y: 20 }}
+            to={{ opacity: 1, y: 0 }}
+            threshold={0.2}
+            rootMargin="-50px"
+            textAlign="center"
+          />
+
+          <SplitText
+            text="Você é o meu lar"
+            tag="h1"
+            className="hero-gradient-text font-serif-display font-bold text-5xl sm:text-7xl leading-tight mb-6"
+            delay={70}
+            duration={1.25}
+            ease="power3.out"
+            splitType="chars"
+            from={{ opacity: 0, y: 50, rotateX: -90 }}
+            to={{ opacity: 1, y: 0, rotateX: 0 }}
+            threshold={0.1}
+            rootMargin="-80px"
+            textAlign="center"
+          />
+
+          <Reveal delay={900}>
+            <p className="text-white/80 text-base sm:text-lg max-w-xl leading-relaxed font-serif-display italic">
+              Cada batida do meu coração tem o seu nome. Role para baixo e venha
+              reviver, comigo, a nossa história. <span className="inline-block heartbeat">❤️</span>
+            </p>
+          </Reveal>
+
+          <div className="scroll-hint mt-16 text-white/50 flex flex-col items-center gap-2">
+            <span className="text-xs uppercase tracking-[0.3em]">deslize</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14M19 12l-7 7-7-7" />
+            </svg>
+          </div>
+        </section>
+
         {/* Player Card */}
         <div className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-white/10">
           {/* Album Art */}
@@ -284,8 +349,26 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Pilha de fotos arrastáveis */}
+        <Reveal className="mt-12 w-full flex flex-col items-center">
+          <h3 className="text-2xl font-bold text-white mb-1 font-serif-display">Nossos momentos</h3>
+          <p className="text-white/50 text-xs mb-6">arraste ou toque para passar 💞</p>
+          <div style={{ width: 256, height: 256 }}>
+            <Stack
+              randomRotation
+              sensitivity={160}
+              sendToBackOnClick
+              autoplay
+              autoplayDelay={3500}
+              pauseOnHover
+              mobileClickOnly
+              cards={stackCards}
+            />
+          </div>
+        </Reveal>
+
         {/* Segunda foto */}
-        <div className="mt-8 w-full max-w-sm">
+        <div className="mt-12 w-full max-w-sm">
           <div className="aspect-square rounded-xl overflow-hidden shadow-2xl">
             <Image
               src="/images/2.jpeg"
@@ -305,19 +388,34 @@ export default function Home() {
         </div>
 
         {/* Contador de tempo */}
-        <div className="mt-6 bg-black/30 backdrop-blur-lg rounded-2xl p-4 w-full max-w-sm border border-white/10">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-white mb-2">Juntos há</h3>
-            <p className="text-red-300 text-xl font-bold font-mono">
-              {timeCounter}
-            </p>
-            <p className="text-gray-400 text-xs mt-2">
-              Desde 8 de abril de 2025
-            </p>
+        <Reveal className="mt-8 w-full max-w-sm">
+          <div className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 w-full border border-white/10 shadow-2xl">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-white mb-3 font-serif-display">Juntos há</h3>
+              <div className="flex items-end justify-center gap-2 mb-1">
+                <CountUp
+                  to={totalDays}
+                  duration={2.2}
+                  separator="."
+                  className="hero-gradient-text font-serif-display font-bold text-6xl tabular-nums leading-none"
+                />
+                <span className="text-red-200/80 text-lg font-semibold mb-1">dias</span>
+              </div>
+              <p className="text-red-300/90 text-lg font-mono tracking-wide mt-2">{timeCounter}</p>
+              <p className="text-gray-400 text-xs mt-3">Desde 8 de abril de 2025 💞</p>
+            </div>
           </div>
-        </div>
+        </Reveal>
 
-
+        {/* Countdown para o apartamento */}
+        <Reveal className="mt-8 w-full max-w-sm">
+          <Countdown
+            target="2026-12-11T00:00:00"
+            title="Nosso apartamento"
+            subtitle="11 de dezembro de 2026 · nosso primeiro lar"
+            emoji="🏡"
+          />
+        </Reveal>
 
         {/* Slideshow de fotos */}
         <div ref={slideshowRef} className="mt-8 w-full max-w-md px-4">
@@ -395,7 +493,7 @@ export default function Home() {
         <div ref={storyRef} className="mt-8 w-full max-w-2xl px-4">
             <div className="bg-black/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/10 text-white">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-white mb-2">Nossa História</h2>
+                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 font-serif-display">Nossa História</h2>
                 <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent mx-auto"></div>
               </div>
               
@@ -435,11 +533,21 @@ export default function Home() {
             </div>
           </div>
 
+        {/* Linha do Tempo */}
+        <div className="mt-16 w-full max-w-3xl px-2 sm:px-4">
+          <Reveal className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 font-serif-display">Nossa Linha do Tempo</h2>
+            <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent mx-auto" />
+            <p className="text-white/60 text-sm mt-3">Cada momento que nos trouxe até aqui</p>
+          </Reveal>
+          <Timeline />
+        </div>
+
         {/* Razões de te amar */}
         <div className="mt-8 w-full max-w-2xl px-4">
           <div className="bg-black/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/10 text-white">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">Razões de te amar</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 font-serif-display">Razões de te amar</h2>
               <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent mx-auto"></div>
             </div>
             
@@ -486,6 +594,12 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Rodapé */}
+        <footer className="mt-16 mb-10 text-center">
+          <p className="font-script text-3xl text-red-200 mb-2">Te amo, hoje e sempre</p>
+          <p className="text-white/40 text-xs">Feito com <span className="heartbeat inline-block">❤️</span> só para você</p>
+        </footer>
       </div>
 
       {/* Efeitos visuais */}
