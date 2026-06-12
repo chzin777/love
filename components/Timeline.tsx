@@ -1,12 +1,13 @@
 'use client';
 
+import { Sandwich, Heart, Gem, Users, Plane, type LucideIcon } from 'lucide-react';
 import Reveal from './Reveal';
 
 interface Milestone {
   date: string;
   title: string;
   description: string;
-  emoji: string;
+  icon: LucideIcon;
 }
 
 // 👉 Edite livremente datas e textos abaixo
@@ -14,32 +15,32 @@ const milestones: Milestone[] = [
   {
     date: '13 de março de 2025',
     title: 'Nosso primeiro piquenique',
-    description: 'Onde tudo começou a florescer — risadas, conversa e a paz de estar perto de você.',
-    emoji: '🧺',
+    description: 'Onde tudo começou a florescer, com risadas, conversa e a paz de estar perto de você. Aqui escolhemos até os nomes dos nossos filhos, bom vc já tinha escolhido, eu só concordei kkkkk.',
+    icon: Sandwich,
   },
   {
     date: '8 de abril de 2025',
     title: 'Começo do namoro',
-    description: 'O dia em que nos tornamos um. Nosso amor, oficial e verdadeiro.',
-    emoji: '❤️',
+    description: 'O dia em que nos tornamos um. Nosso amor, oficial e verdadeiro. Um dos dias mais felizes da minha vida.',
+    icon: Heart,
   },
   {
     date: '8 de maio de 2025',
     title: 'Alianças e o pedido oficial',
-    description: 'Um sim de coração, um compromisso para a vida. Selamos o nosso para sempre.',
-    emoji: '💍',
+    description: 'Um sim de coração, um compromisso para a vida.',
+    icon: Gem,
   },
   {
     date: '15 de junho de 2025',
     title: 'Conheci seus pais',
-    description: 'Fui recebido pela sua família — mais um passo importante na nossa jornada juntos.',
-    emoji: '👨‍👩‍👧',
+    description: 'Fui recebido pela sua família, mais um passo importante na nossa jornada juntos.',
+    icon: Users,
   },
   {
     date: '18 de outubro de 2025',
     title: 'Nossa primeira viagem juntos',
     description: 'Novos lugares, mesma sintonia. Levamos nosso amor estrada afora.',
-    emoji: '✈️',
+    icon: Plane,
   },
 ];
 
@@ -52,6 +53,7 @@ export default function Timeline() {
       <div className="space-y-8 sm:space-y-12">
         {milestones.map((m, i) => {
           const isLeft = i % 2 === 0;
+          const Icon = m.icon;
           return (
             <Reveal key={i} from={isLeft ? 'right' : 'left'} delay={60}>
               <div
@@ -60,8 +62,8 @@ export default function Timeline() {
                 }`}
               >
                 {/* Ponto na linha */}
-                <div className="absolute left-4 sm:left-1/2 -translate-x-1/2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-900 border-2 border-white/20 shadow-lg shadow-red-900/40 text-sm">
-                  {m.emoji}
+                <div className="absolute left-4 sm:left-1/2 -translate-x-1/2 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-900 border-2 border-white/20 shadow-lg shadow-red-900/40">
+                  <Icon className="w-4 h-4 text-white" strokeWidth={2} />
                 </div>
 
                 {/* Card */}

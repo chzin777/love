@@ -2,6 +2,29 @@
 
 import { useEffect, useState } from 'react';
 
+// Girassol desenhado em SVG (sem emoji)
+function Sunflower() {
+  const petals = Array.from({ length: 12 });
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" style={{ filter: 'drop-shadow(0 0 3px rgba(250, 204, 21, 0.5))' }}>
+      <g transform="translate(12 12)">
+        {petals.map((_, i) => (
+          <ellipse
+            key={i}
+            rx="2.1"
+            ry="5"
+            cy="-6"
+            fill="#facc15"
+            transform={`rotate(${i * 30})`}
+          />
+        ))}
+        <circle r="4" fill="#7c2d12" />
+        <circle r="2.4" fill="#a16207" />
+      </g>
+    </svg>
+  );
+}
+
 interface Petal {
   id: number;
   x: number;
@@ -61,12 +84,10 @@ export default function PetalEffect() {
             top: petal.y,
             transform: `rotate(${petal.rotation}deg) scale(${petal.scale})`,
             opacity: petal.opacity,
-            color: petal.color,
             animationDuration: `${petal.duration}s`,
-            fontSize: '20px'
           }}
         >
-          🌸
+          <Sunflower />
         </div>
       ))}
       

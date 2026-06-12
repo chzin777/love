@@ -26,7 +26,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Nossa História ❤️",
+  title: "Nossa História",
   description: "Um cantinho feito com amor, só nosso.",
 };
 

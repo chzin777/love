@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { House, PartyPopper, Heart, type LucideIcon } from 'lucide-react';
 
 interface CountdownProps {
   /** Data alvo no formato ISO, ex: '2026-12-11T00:00:00' */
   target: string;
   title: string;
   subtitle?: string;
-  emoji?: string;
+  icon?: LucideIcon;
 }
 
 interface TimeLeft {
@@ -32,7 +33,7 @@ const calc = (target: string): TimeLeft => {
   };
 };
 
-export default function Countdown({ target, title, subtitle, emoji = '🏡' }: CountdownProps) {
+export default function Countdown({ target, title, subtitle, icon: Icon = House }: CountdownProps) {
   // Inicia null para evitar mismatch de hidratação (servidor x cliente)
   const [time, setTime] = useState<TimeLeft | null>(null);
 
@@ -54,13 +55,17 @@ export default function Countdown({ target, title, subtitle, emoji = '🏡' }: C
   return (
     <div className="bg-black/30 backdrop-blur-lg rounded-3xl p-6 sm:p-8 w-full border border-white/10 shadow-2xl">
       <div className="text-center mb-6">
-        <span className="text-4xl">{emoji}</span>
-        <h3 className="text-2xl font-bold text-white mt-2 mb-1">{title}</h3>
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/30 to-red-900/30 border border-red-400/20 mb-3">
+          <Icon className="w-7 h-7 text-red-200" strokeWidth={1.75} />
+        </div>
+        <h3 className="text-2xl font-bold text-white mb-1">{title}</h3>
         {subtitle && <p className="text-gray-400 text-sm">{subtitle}</p>}
       </div>
 
       {time?.reached ? (
-        <p className="text-center text-red-300 text-xl font-bold py-4">Chegou o grande dia! 🥳❤️</p>
+        <p className="text-center text-red-300 text-xl font-bold py-4 inline-flex items-center justify-center gap-2 w-full">
+          <PartyPopper className="w-6 h-6 text-yellow-300" /> Chegou o grande dia! <Heart className="w-6 h-6 text-red-400 fill-red-400" />
+        </p>
       ) : (
         <div className="grid grid-cols-4 gap-2 sm:gap-3">
           {units.map((u) => (

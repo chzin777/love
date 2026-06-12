@@ -1,13 +1,14 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
+import { Heart, Sparkles } from "lucide-react";
 import DarkVeil from "../components/DarkVeil";
 import FallingFeather from "../components/FallingFeather";
 import PetalEffect from "../components/PetalEffect";
 import SplitText from "../components/SplitText";
 import Stack from "../components/Stack";
-import CountUp from "../components/CountUp";
+import TogetherCounter from "../components/TogetherCounter";
 import Countdown from "../components/Countdown";
 import Timeline from "../components/Timeline";
 import Reveal from "../components/Reveal";
@@ -19,16 +20,9 @@ export default function Home() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
-  const [timeCounter, setTimeCounter] = useState('');
-  const [totalDays, setTotalDays] = useState(0);
-  const [showPhotos, setShowPhotos] = useState(true);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [showFeather, setShowFeather] = useState(true);
-  const [showStory, setShowStory] = useState(true);
   const [visibleReasons, setVisibleReasons] = useState(50);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const slideshowRef = useRef<HTMLDivElement>(null);
-  const storyRef = useRef<HTMLDivElement>(null);
   const photos = useMemo(() => [1, 2, 3, 4, 5], []);
   // Memoizado: o contador re-renderiza a cada 1s; sem isso o Stack reiniciaria sempre
   const stackCards = useMemo(
@@ -105,55 +99,27 @@ export default function Home() {
     }
   };
 
-  // Contador de tempo desde 8 de abril de 2025
-  useEffect(() => {
-    const updateCounter = () => {
-      const startDate = new Date('2025-04-08T00:00:00');
-      const now = new Date();
-      const diff = now.getTime() - startDate.getTime();
-
-      const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      setTotalDays(totalDays);
-      const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      setTimeCounter(timeString);
-    };
-
-    updateCounter();
-    const interval = setInterval(updateCounter, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Slideshow automático
-  useEffect(() => {
-    if (!showPhotos) return;
-
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % photos.length);
-    }, 3000); // Muda a cada 3 segundos
-
-    return () => clearInterval(interval);
-  }, [showPhotos, photos.length]);
-
   return (
     <div className="min-h-screen relative overflow-hidden" style={{
    
     }}>
-      {/* Fundo Dark Veil animado como overlay */}
-      <div className="absolute inset-0 opacity-30">
-        <DarkVeil 
-          hueShift={247}
-          noiseIntensity={0.1}
-          scanlineIntensity={0.05}
-          speed={0.3}
-          scanlineFrequency={0.02}
-          warpAmount={0.1}
-          resolutionScale={1}
-        />
+      {/* Fundo Dark Veil animado, fixo cobrindo todo o site, em vermelho */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 opacity-60">
+          <DarkVeil
+            hueShift={0}
+            noiseIntensity={0}
+            scanlineIntensity={0}
+            speed={0.5}
+            scanlineFrequency={0}
+            warpAmount={0}
+            resolutionScale={1}
+          />
+        </div>
+        {/* Tinta vermelha: força o tom vermelho sobre o veil */}
+        <div className="absolute inset-0 bg-[#dc2626] mix-blend-color" />
+        {/* Escurece um pouco para legibilidade do conteúdo */}
+        <div className="absolute inset-0 bg-black/40" />
       </div>
 
       {/* Audio element - você pode adicionar uma fonte de áudio aqui */}
@@ -171,42 +137,20 @@ export default function Home() {
         <section className="min-h-screen w-full flex flex-col items-center justify-center text-center max-w-3xl mx-auto">
           <SplitText
             text="Para o amor da minha vida"
-            tag="p"
-            className="font-script text-2xl sm:text-3xl text-red-200/90 mb-4"
-            delay={40}
-            duration={1}
+            tag="h1"
+            className="font-script text-red-200/95 text-5xl sm:text-7xl leading-tight"
+            delay={50}
+            duration={1.1}
             ease="power3.out"
             splitType="words"
-            from={{ opacity: 0, y: 20 }}
+            from={{ opacity: 0, y: 30 }}
             to={{ opacity: 1, y: 0 }}
             threshold={0.2}
             rootMargin="-50px"
             textAlign="center"
           />
 
-          <SplitText
-            text="Você é o meu lar"
-            tag="h1"
-            className="hero-gradient-text font-serif-display font-bold text-5xl sm:text-7xl leading-tight mb-6"
-            delay={70}
-            duration={1.25}
-            ease="power3.out"
-            splitType="chars"
-            from={{ opacity: 0, y: 50, rotateX: -90 }}
-            to={{ opacity: 1, y: 0, rotateX: 0 }}
-            threshold={0.1}
-            rootMargin="-80px"
-            textAlign="center"
-          />
-
-          <Reveal delay={900}>
-            <p className="text-white/80 text-base sm:text-lg max-w-xl leading-relaxed font-serif-display italic">
-              Cada batida do meu coração tem o seu nome. Role para baixo e venha
-              reviver, comigo, a nossa história. <span className="inline-block heartbeat">❤️</span>
-            </p>
-          </Reveal>
-
-          <div className="scroll-hint mt-16 text-white/50 flex flex-col items-center gap-2">
+          <div className="scroll-hint mt-20 text-white/50 flex flex-col items-center gap-2">
             <span className="text-xs uppercase tracking-[0.3em]">deslize</span>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M19 12l-7 7-7-7" />
@@ -230,7 +174,7 @@ export default function Home() {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   target.parentElement!.style.background = 'linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)';
-                  target.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-white text-6xl">🎵</div>';
+                  target.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-white"><svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg></div>';
                 }}
               />
             </div>
@@ -352,16 +296,11 @@ export default function Home() {
         {/* Pilha de fotos arrastáveis */}
         <Reveal className="mt-12 w-full flex flex-col items-center">
           <h3 className="text-2xl font-bold text-white mb-1 font-serif-display">Nossos momentos</h3>
-          <p className="text-white/50 text-xs mb-6">arraste ou toque para passar 💞</p>
+          <p className="text-white/50 text-xs mb-6 inline-flex items-center gap-1">arraste ou toque para passar <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400" /></p>
           <div style={{ width: 256, height: 256 }}>
             <Stack
-              randomRotation
               sensitivity={160}
               sendToBackOnClick
-              autoplay
-              autoplayDelay={3500}
-              pauseOnHover
-              mobileClickOnly
               cards={stackCards}
             />
           </div>
@@ -381,116 +320,26 @@ export default function Home() {
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
                 target.parentElement!.style.background = 'linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%)';
-                target.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-white text-6xl">💕</div>';
+                target.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-white"><svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>';
               }}
             />
           </div>
         </div>
 
         {/* Contador de tempo */}
-        <Reveal className="mt-8 w-full max-w-sm">
-          <div className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 w-full border border-white/10 shadow-2xl">
-            <div className="text-center">
-              <h3 className="text-xl font-semibold text-white mb-3 font-serif-display">Juntos há</h3>
-              <div className="flex items-end justify-center gap-2 mb-1">
-                <CountUp
-                  to={totalDays}
-                  duration={2.2}
-                  separator="."
-                  className="hero-gradient-text font-serif-display font-bold text-6xl tabular-nums leading-none"
-                />
-                <span className="text-red-200/80 text-lg font-semibold mb-1">dias</span>
-              </div>
-              <p className="text-red-300/90 text-lg font-mono tracking-wide mt-2">{timeCounter}</p>
-              <p className="text-gray-400 text-xs mt-3">Desde 8 de abril de 2025 💞</p>
-            </div>
-          </div>
-        </Reveal>
+        <TogetherCounter />
 
         {/* Countdown para o apartamento */}
         <Reveal className="mt-8 w-full max-w-sm">
           <Countdown
             target="2026-12-11T00:00:00"
             title="Nosso apartamento"
-            subtitle="11 de dezembro de 2026 · nosso primeiro lar"
-            emoji="🏡"
+            subtitle="11 de dezembro de 2026, nosso primeiro lar"
           />
         </Reveal>
 
-        {/* Slideshow de fotos */}
-        <div ref={slideshowRef} className="mt-8 w-full max-w-md px-4">
-            <div className="relative aspect-square rounded-2xl overflow-hidden shadow-2xl bg-black/20">
-              {/* Imagens do slideshow */}
-              {photos.map((num, index) => (
-                <div
-                  key={num}
-                  className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                    index === currentSlide
-                      ? 'opacity-100 scale-100'
-                      : 'opacity-0 scale-105'
-                  }`}
-                >
-                  <Image
-                    src={`/images/${num}.jpeg`}
-                    alt={`Nossa foto ${num}`}
-                    width={500}
-                    height={500}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.parentElement!.style.background = 'linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%)';
-                      target.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-white text-6xl">💕</div>';
-                    }}
-                  />
-                </div>
-              ))}
-              
-              {/* Indicadores de slide */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {photos.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      index === currentSlide
-                        ? 'bg-white shadow-lg'
-                        : 'bg-white/40 hover:bg-white/60'
-                    }`}
-                  />
-                ))}
-              </div>
-              
-              {/* Controles de navegação */}
-              <button
-                onClick={() => setCurrentSlide((prev) => (prev - 1 + photos.length) % photos.length)}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full p-2 transition-all duration-300"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                </svg>
-              </button>
-              
-              <button
-                onClick={() => setCurrentSlide((prev) => (prev + 1) % photos.length)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full p-2 transition-all duration-300"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                </svg>
-              </button>
-            </div>
-            
-            {/* Contador de slides */}
-            <div className="mt-4 text-center">
-              <p className="text-white/60 text-sm">
-                {currentSlide + 1} de {photos.length}
-              </p>
-            </div>
-          </div>
-
         {/* Nossa História */}
-        <div ref={storyRef} className="mt-8 w-full max-w-2xl px-4">
+        <div className="mt-8 w-full max-w-2xl px-4">
             <div className="bg-black/20 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/10 text-white">
               <div className="text-center mb-8">
                 <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 font-serif-display">Nossa História</h2>
@@ -503,7 +352,7 @@ export default function Home() {
                 </p>
                 
                 <p className="text-lg">
-                  O nosso amor floresceu de um jeito rápido, leve e incrível. Foi natural, foi verdadeiro — parecia que estávamos apenas deixando acontecer algo que já era nosso por destino.
+                  O nosso amor floresceu de um jeito rápido, leve e incrível. Foi natural, foi verdadeiro, parecia que estávamos apenas deixando acontecer algo que já era nosso por destino.
                 </p>
                 
                 <p className="text-lg">
@@ -525,9 +374,9 @@ export default function Home() {
               
               <div className="mt-8 text-center">
                 <div className="inline-flex items-center space-x-2 text-red-300">
-                  <span className="text-2xl">💕</span>
-                  <span className="text-sm font-medium">Com amor seu futuro marido❤️</span>
-                  <span className="text-2xl">💕</span>
+                  <Heart className="w-5 h-5 text-red-400 fill-red-400" />
+                  <span className="text-sm font-medium">Com amor, seu futuro marido</span>
+                  <Heart className="w-5 h-5 text-red-400 fill-red-400" />
                 </div>
               </div>
             </div>
@@ -559,7 +408,7 @@ export default function Home() {
                   style={{ animationDelay: `${index * 0.02}s` }}
                 >
                   <div className="flex items-center space-x-3">
-                    <span className="text-red-400 text-xl group-hover:scale-125 transition-transform duration-300">❤️</span>
+                    <Heart className="text-red-400 fill-red-400 w-5 h-5 flex-shrink-0 group-hover:scale-125 transition-transform duration-300" />
                     <p className="text-white/90 group-hover:text-white transition-colors duration-300 text-sm">{razao}</p>
                   </div>
                 </div>
@@ -569,22 +418,22 @@ export default function Home() {
             <div className="mt-6 text-center space-y-4">
               <div className="text-red-200">
                 <p className="font-bold text-lg">{visibleReasons.toLocaleString()} de {reasons.length.toLocaleString()} razões mostradas</p>
-                <p className="text-sm opacity-75">Cada uma única e verdadeira 💕</p>
+                <p className="text-sm opacity-75 inline-flex items-center gap-1">Cada uma única e verdadeira <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400" /></p>
               </div>
               
               {visibleReasons < reasons.length && (
                 <button
                   onClick={() => setVisibleReasons(prev => Math.min(prev + 100, reasons.length))}
-                  className="bg-red-500/20 hover:bg-red-500/30 text-white px-6 py-3 rounded-2xl transition-all duration-300 border border-red-400/20 hover:border-red-400/40"
+                  className="bg-red-500/20 hover:bg-red-500/30 text-white px-6 py-3 rounded-2xl transition-all duration-300 border border-red-400/20 hover:border-red-400/40 inline-flex items-center gap-2"
                 >
-                  Ver mais razões ❤️ (+100)
+                  Ver mais razões <Heart className="w-4 h-4 text-red-400 fill-red-400" /> (+100)
                 </button>
               )}
               
               {visibleReasons >= reasons.length && (
                 <div className="text-center">
-                  <p className="text-red-200 font-medium text-lg">
-                    ✨ Todas as 5.000 razões reveladas! ✨
+                  <p className="text-red-200 font-medium text-lg inline-flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-yellow-300" /> Todas as 5.000 razões reveladas! <Sparkles className="w-5 h-5 text-yellow-300" />
                   </p>
                   <p className="text-white/70 text-sm mt-2">
                     E ainda assim, não são suficientes para expressar todo meu amor...
@@ -598,7 +447,7 @@ export default function Home() {
         {/* Rodapé */}
         <footer className="mt-16 mb-10 text-center">
           <p className="font-script text-3xl text-red-200 mb-2">Te amo, hoje e sempre</p>
-          <p className="text-white/40 text-xs">Feito com <span className="heartbeat inline-block">❤️</span> só para você</p>
+          <p className="text-white/40 text-xs inline-flex items-center gap-1">Feito com <Heart className="heartbeat w-3.5 h-3.5 text-red-500 fill-red-500" /> só para você</p>
         </footer>
       </div>
 
