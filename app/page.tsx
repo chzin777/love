@@ -194,7 +194,7 @@ export default function Home() {
           10000, // hero
           null,  // nossos momentos (interativo)
           10000, // juntos há
-          6000,  // countdown
+          13000, // countdown
           45000, // nossa história (texto longo)
           45000, // linha do tempo
           null,  // razões (interativo)
