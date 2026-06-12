@@ -28,11 +28,10 @@ function Sunflower() {
 interface Petal {
   id: number;
   x: number;
-  y: number;
-  rotation: number;
   scale: number;
   opacity: number;
-  color: string;
+  drift: number;
+  tilt: number;
   duration: number;
 }
 
@@ -44,30 +43,28 @@ export default function PetalEffect() {
       const newPetal: Petal = {
         id: Date.now() + Math.random(),
         x: Math.random() * window.innerWidth,
-        y: -50, // Começar acima da tela
-        rotation: Math.random() * 360,
-        scale: 0.6 + Math.random() * 0.8,
-        opacity: 0.6 + Math.random() * 0.4,
-        color: ['#ff6b9d', '#ffa8cc', '#ff9999', '#ffb3ba', '#ff8fa3'][Math.floor(Math.random() * 5)],
-        duration: 4 + Math.random() * 3 // 4-7 segundos para cair
+        scale: 0.5 + Math.random() * 0.5,
+        opacity: 0.5 + Math.random() * 0.4,
+        drift: -20 + Math.random() * 40, // leve deriva horizontal
+        tilt: -8 + Math.random() * 16, // pequena inclinacao
+        duration: 9 + Math.random() * 5, // 9-14s, queda lenta
       };
-      
+
       setPetals(prev => [...prev, newPetal]);
-      
-      // Remove a pétala após sua duração
+
       setTimeout(() => {
         setPetals(prev => prev.filter(p => p.id !== newPetal.id));
       }, newPetal.duration * 1000);
     };
 
-    // Criar pétalas continuamente
+    // Poucos girassois: novo a cada ~3-4.5s
     const interval = setInterval(() => {
       createPetal();
-    }, 800 + Math.random() * 1200); // A cada 0.8-2 segundos
+    }, 3000 + Math.random() * 1500);
 
-    // Criar algumas pétalas iniciais
-    for (let i = 0; i < 5; i++) {
-      setTimeout(createPetal, i * 500);
+    // Alguns iniciais espalhados
+    for (let i = 0; i < 3; i++) {
+      setTimeout(createPetal, i * 1500);
     }
 
     return () => clearInterval(interval);
@@ -78,47 +75,42 @@ export default function PetalEffect() {
       {petals.map((petal) => (
         <div
           key={petal.id}
-          className="absolute animate-continuous-fall"
+          className="absolute rain-fall"
           style={{
             left: petal.x,
-            top: petal.y,
-            transform: `rotate(${petal.rotation}deg) scale(${petal.scale})`,
+            top: -40,
             opacity: petal.opacity,
             animationDuration: `${petal.duration}s`,
+            ['--drift' as string]: `${petal.drift}px`,
+            ['--tilt' as string]: `${petal.tilt}deg`,
           }}
         >
-          <Sunflower />
+          <div style={{ transform: `scale(${petal.scale})` }}>
+            <Sunflower />
+          </div>
         </div>
       ))}
-      
+
       <style jsx>{`
-        .animate-continuous-fall {
-          animation: continuousPetalFall ease-in-out forwards;
-          filter: drop-shadow(0 0 4px rgba(255, 182, 193, 0.5));
+        .rain-fall {
+          animation-name: rainFall;
+          animation-timing-function: linear;
+          animation-fill-mode: forwards;
         }
-        
-        @keyframes continuousPetalFall {
+
+        @keyframes rainFall {
           0% {
-            transform: rotate(0deg) translateY(-50px) translateX(0px);
+            transform: translateY(-40px) translateX(0) rotate(0deg);
             opacity: 0;
           }
-          10% {
+          12% {
             opacity: 1;
           }
-          25% {
-            transform: rotate(90deg) translateY(25vh) translateX(-20px);
-          }
-          50% {
-            transform: rotate(180deg) translateY(50vh) translateX(15px);
-          }
-          75% {
-            transform: rotate(270deg) translateY(75vh) translateX(-10px);
-          }
-          90% {
+          88% {
             opacity: 1;
           }
           100% {
-            transform: rotate(360deg) translateY(100vh) translateX(5px);
+            transform: translateY(108vh) translateX(var(--drift)) rotate(var(--tilt));
             opacity: 0;
           }
         }

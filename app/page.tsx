@@ -110,7 +110,7 @@ export default function Home() {
             hueShift={0}
             noiseIntensity={0}
             scanlineIntensity={0}
-            speed={0.5}
+            speed={1.4}
             scanlineFrequency={0}
             warpAmount={0}
             resolutionScale={1}
@@ -138,7 +138,7 @@ export default function Home() {
           <SplitText
             text="Para o amor da minha vida"
             tag="h1"
-            className="font-script text-red-200/95 text-5xl sm:text-7xl leading-tight"
+            className="font-script text-white text-5xl sm:text-7xl leading-tight"
             delay={50}
             duration={1.1}
             ease="power3.out"
@@ -297,7 +297,7 @@ export default function Home() {
         <Reveal className="mt-12 w-full flex flex-col items-center">
           <h3 className="text-2xl font-bold text-white mb-1 font-serif-display">Nossos momentos</h3>
           <p className="text-white/50 text-xs mb-6 inline-flex items-center gap-1">arraste ou toque para passar <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400" /></p>
-          <div style={{ width: 256, height: 256 }}>
+          <div style={{ width: 'min(86vw, 380px)', height: 'min(86vw, 380px)' }}>
             <Stack
               sensitivity={160}
               sendToBackOnClick

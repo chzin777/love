@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Feather } from 'lucide-react';
 
 interface FeatherProps {
   onComplete?: () => void;
@@ -27,13 +26,48 @@ export default function FallingFeather({ onComplete }: FeatherProps) {
       {/* Pena caindo */}
       <div className="feather-container">
         <div className="feather">
-          <Feather
+          {/* Silhueta de pena (pluma de ganso), branca */}
+          <svg
             className="feather-svg"
-            width={90}
-            height={90}
-            color="white"
-            strokeWidth={1.5}
-          />
+            width="80"
+            height="150"
+            viewBox="0 0 120 220"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Pluma */}
+            <path
+              d="M60 6
+                 C 84 40, 98 86, 90 128
+                 C 86 150, 75 166, 63 176
+                 L 63 214
+                 L 57 214
+                 L 57 176
+                 C 45 166, 34 150, 30 128
+                 C 22 86, 36 40, 60 6 Z"
+              fill="white"
+            />
+            {/* Haste central, leve sombra para dar profundidade */}
+            <path
+              d="M60 18 L60 176"
+              stroke="rgba(0,0,0,0.10)"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            {/* Barbas: pequenas separacoes diagonais */}
+            <g stroke="rgba(0,0,0,0.08)" strokeWidth="1.4" strokeLinecap="round">
+              <path d="M60 40 L42 54" />
+              <path d="M60 40 L78 54" />
+              <path d="M60 64 L38 80" />
+              <path d="M60 64 L82 80" />
+              <path d="M60 90 L36 106" />
+              <path d="M60 90 L84 106" />
+              <path d="M60 116 L40 130" />
+              <path d="M60 116 L80 130" />
+              <path d="M60 140 L46 152" />
+              <path d="M60 140 L74 152" />
+            </g>
+          </svg>
         </div>
       </div>
 
