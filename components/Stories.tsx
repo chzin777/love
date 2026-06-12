@@ -49,7 +49,7 @@ export default function Stories({ slides }: StoriesProps) {
 
   return (
     <div
-      className="fixed inset-0 z-10"
+      className="fixed inset-0 z-10 overflow-hidden"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
@@ -70,24 +70,25 @@ export default function Stories({ slides }: StoriesProps) {
         ))}
       </div>
 
-      {/* Slides */}
-      {slides.map((slide, i) => (
-        <div
-          key={i}
-          className="absolute inset-0 overflow-y-auto transition-opacity duration-500"
-          style={{
-            opacity: i === index ? 1 : 0,
-            pointerEvents: i === index ? 'auto' : 'none',
-          }}
-          aria-hidden={i !== index}
-        >
-          <div className="min-h-full w-full flex flex-col items-center justify-center px-5 pt-16 pb-20">
-            <StoryActiveContext.Provider value={i === index}>
-              {slide}
-            </StoryActiveContext.Provider>
+      {/* Trilho horizontal (transição estilo stories) */}
+      <div
+        className="flex h-full w-full transition-transform duration-500 ease-out"
+        style={{ transform: `translateX(-${index * 100}%)` }}
+      >
+        {slides.map((slide, i) => (
+          <div
+            key={i}
+            className="w-full h-full flex-shrink-0 overflow-y-auto"
+            aria-hidden={i !== index}
+          >
+            <div className="min-h-full w-full flex flex-col items-center justify-center px-5 pt-16 pb-20">
+              <StoryActiveContext.Provider value={i === index}>
+                {slide}
+              </StoryActiveContext.Provider>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {/* Navegação lateral */}
       {index > 0 && (

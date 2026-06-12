@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { Heart, Sparkles } from "lucide-react";
 import DarkVeil from "../components/DarkVeil";
 import FallingFeather from "../components/FallingFeather";
@@ -13,6 +13,7 @@ import Countdown from "../components/Countdown";
 import Timeline from "../components/Timeline";
 import Reveal from "../components/Reveal";
 import Stories from "../components/Stories";
+import WordGame from "../components/WordGame";
 import { generateReasons } from "../utils/reasons";
 
 export default function Home() {
@@ -89,20 +90,29 @@ export default function Home() {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const skipPrevious = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = START_AT;
-      setCurrentTime(START_AT);
-    }
-  };
-
-  const skipNext = () => {
-    // Simulação - em um player real, mudaria para a próxima música
-    if (audioRef.current) {
-      audioRef.current.currentTime = START_AT;
-      setCurrentTime(START_AT);
-    }
-  };
+  // Autoplay no primeiro gesto do usuário (navegadores bloqueiam som sem interação)
+  useEffect(() => {
+    const startOnGesture = () => {
+      const a = audioRef.current;
+      if (a && a.paused) {
+        a.currentTime = START_AT;
+        a.play()
+          .then(() => setIsPlaying(true))
+          .catch(() => {});
+      }
+      window.removeEventListener('pointerdown', startOnGesture);
+      window.removeEventListener('keydown', startOnGesture);
+      window.removeEventListener('touchstart', startOnGesture);
+    };
+    window.addEventListener('pointerdown', startOnGesture);
+    window.addEventListener('keydown', startOnGesture);
+    window.addEventListener('touchstart', startOnGesture);
+    return () => {
+      window.removeEventListener('pointerdown', startOnGesture);
+      window.removeEventListener('keydown', startOnGesture);
+      window.removeEventListener('touchstart', startOnGesture);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{
@@ -110,7 +120,7 @@ export default function Home() {
     }}>
       {/* Fundo Dark Veil animado, fixo cobrindo todo o site, em vermelho */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 opacity-60">
+        <div className="absolute inset-0 opacity-40">
           <DarkVeil
             hueShift={0}
             noiseIntensity={0}
@@ -123,8 +133,8 @@ export default function Home() {
         </div>
         {/* Tinta vermelha: força o tom vermelho sobre o veil */}
         <div className="absolute inset-0 bg-[#dc2626] mix-blend-color" />
-        {/* Escurece um pouco para legibilidade do conteúdo */}
-        <div className="absolute inset-0 bg-black/40" />
+        {/* Escurece para um fundo mais sutil e legível */}
+        <div className="absolute inset-0 bg-black/60" />
       </div>
 
       {/* Audio element - você pode adicionar uma fonte de áudio aqui */}
@@ -164,9 +174,12 @@ export default function Home() {
         </section>,
         /* Player */
         <div key="player" className="bg-black/30 backdrop-blur-lg rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-white/10">
-          {/* Album Art */}
-          <div className="relative mb-6">
-            <div className="aspect-square rounded-xl overflow-hidden shadow-2xl">
+          {/* Capa em vinil */}
+          <div className="relative mb-6 flex items-center justify-center">
+            <div
+              className="vinyl relative w-60 h-60 rounded-full overflow-hidden shadow-2xl ring-4 ring-black/70"
+              style={{ animationPlayState: isPlaying ? 'running' : 'paused' }}
+            >
               <Image
                 src="/images/1.jpeg"
                 alt="Album Cover"
@@ -174,13 +187,18 @@ export default function Home() {
                 height={400}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  // Fallback para quando a imagem não existir
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   target.parentElement!.style.background = 'linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%)';
                   target.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-white"><svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg></div>';
                 }}
               />
+              {/* Brilho radial do disco */}
+              <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,transparent_40%,rgba(0,0,0,0.35)_70%)]" />
+              {/* Furo central */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-7 h-7 rounded-full bg-black/85 border-2 border-white/40" />
+              </div>
             </div>
           </div>
 
@@ -211,56 +229,22 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Controls */}
-          <div className="flex items-center justify-center space-x-4 mb-4">
-            {/* Shuffle */}
-            <button className="text-gray-400 hover:text-white transition-colors p-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M14.83 13.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13zM14.5 4l2.04 2.04L13.41 9.17l1.41 1.41L17.96 7.46 20 9.5V4h-5.5zm-9.96 9.96L6.17 12.41 4.04 10.04 6.5 8H1v5.5l2.04-2.04 3.13 3.13 1.41-1.41z"/>
-              </svg>
-            </button>
-
-            {/* Previous */}
-            <button 
-              onClick={skipPrevious}
-              className="text-gray-400 hover:text-white transition-colors p-2"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-              </svg>
-            </button>
-
-            {/* Play/Pause */}
-            <button 
+          {/* Play/Pause */}
+          <div className="flex items-center justify-center mb-4">
+            <button
               onClick={togglePlay}
-              className="bg-red-800 text-white rounded-full p-3 hover:scale-105 hover:bg-red-900 transition-all shadow-lg"
+              className="bg-red-800 text-white rounded-full p-4 hover:scale-105 hover:bg-red-900 transition-all shadow-lg"
+              aria-label={isPlaying ? 'Pausar' : 'Tocar'}
             >
               {isPlaying ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
                 </svg>
               ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M8 5v14l11-7z"/>
                 </svg>
               )}
-            </button>
-
-            {/* Next */}
-            <button 
-              onClick={skipNext}
-              className="text-gray-400 hover:text-white transition-colors p-2"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-              </svg>
-            </button>
-
-            {/* Repeat */}
-            <button className="text-gray-400 hover:text-white transition-colors p-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
-              </svg>
             </button>
           </div>
 
@@ -413,6 +397,8 @@ export default function Home() {
             </div>
           </div>
         </div>,
+        /* Jogo de palavras */
+        <WordGame key="wordgame" />,
         /* Rodapé */
         <footer key="footer" className="text-center">
           <p className="font-script text-4xl sm:text-5xl text-red-200 mb-3">Te amo, hoje e sempre</p>
@@ -447,6 +433,15 @@ export default function Home() {
           cursor: pointer;
           border: none;
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .vinyl {
+          animation: vinylSpin 14s linear infinite;
+        }
+
+        @keyframes vinylSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
 
         /* Melhor área de toque para mobile */
