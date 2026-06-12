@@ -342,14 +342,6 @@ export default function Home() {
                 <p className="text-lg">
                   Hoje, seguimos caminhando juntos, planejando nossa vida: já compramos o nosso apartamento, sonhando com nosso casamento, imaginando a casa com nossos móveis, nossas histórias e nossos sonhos.
                 </p>
-                
-                <p className="text-lg font-medium text-red-200">
-                  Nosso namoro é leve. A gente sorri muito. Somos a paz um do outro.
-                </p>
-                
-                <p className="text-lg text-center font-semibold text-white mt-8">
-                  E agora seguimos, de mãos dadas, rumo a construir a vida que sempre desejamos.
-                </p>
               </div>
               
               <div className="mt-8 text-center">
