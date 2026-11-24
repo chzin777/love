@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nossa História
 
-## Getting Started
+Página pessoal e interativa para casal: linha do tempo, contador de tempo juntos, contagem regressiva, histórias em formato "stories", jogo de palavras e lista de motivos — com efeitos visuais (pétalas, estrelas cadentes, véu animado).
 
-First, run the development server:
+**Produção:** https://love-flax-six.vercel.app
+
+## Stack
+
+- [Next.js 16](https://nextjs.org) (App Router) + React 19 + TypeScript
+- Tailwind CSS 4
+- GSAP, Motion e Lenis (animações e rolagem)
+- OGL (efeitos WebGL do fundo)
+
+## Como rodar
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sem variáveis de ambiente — site estático.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estrutura
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/                 layout e página única
+components/
+  Timeline.tsx       linha do tempo do relacionamento
+  TogetherCounter.tsx / CountUp.tsx   tempo juntos
+  Countdown.tsx      contagem regressiva para a próxima data
+  Stories.tsx / ScrollStack.tsx / Stack.tsx   cards e histórias
+  WordGame.tsx       jogo de palavras
+  FinalStory.tsx     encerramento
+  PetalEffect, ShootingStars, DarkVeil, FallingFeather   efeitos visuais
+utils/reasons.ts     lista de motivos exibida na página
+public/              fotos e mídias
+```
 
-## Learn More
+Para personalizar, troque as fotos em `public/`, os textos nos componentes e a lista em `utils/reasons.ts`.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Vercel — cada push na branch padrão publica automaticamente.
